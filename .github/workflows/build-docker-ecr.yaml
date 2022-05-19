@@ -6,6 +6,10 @@ on:
       name:
         type: string
         required: true
+      context:
+        type: string
+        required: false
+        default: .
       region:
         type: string
         required: true
@@ -14,6 +18,8 @@ on:
         required: true
       ecr_secret_key:
         required: true
+      build_secrets:
+        required: false
 
 jobs:
   build:
@@ -49,16 +55,13 @@ jobs:
       - name: docker-build
         uses: docker/build-push-action@v3
         with:
-          context: docker/npm-test/v2
+          context: ${{ inputs.context }}
           tags: |
             ${{ inputs.name }}:${{ env.branch }}
             ${{ inputs.name }}:${{ env.branch }}-${{ env.commit }}
             ${{ inputs.name }}:${{ env.number }}
           load: true
-          secrets: |
-            npm_auth=${{ secrets.NPM_CONFIG__AUTH }}
-            npm_email=${{ secrets.NPM_CONFIG_EMAIL }}
-            npm_registry=${{ secrets.NPM_CONFIG_REGISTRY }}
+          secrets: ${{ secrets.build_secrets }}
 
       - name: debug
         env:
