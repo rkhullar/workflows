@@ -56,6 +56,8 @@ jobs:
 
       - name: docker-build-push
         uses: docker/build-push-action@v3
+        env:
+          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
         with:
           push: true
           context: ${{ inputs.context }}
