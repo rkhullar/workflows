@@ -67,7 +67,7 @@ jobs:
         env:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${number}
+          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
+          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
+          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${number}
           docker images
