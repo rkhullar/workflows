@@ -4,9 +4,10 @@ on:
   workflow_call:
     inputs:
       name:
-        required: true
         type: string
+        required: true
       region:
+        type: string
         required: true
     secrets:
       ecr_access_key:
