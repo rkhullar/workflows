@@ -54,30 +54,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: docker-build
+      - name: docker-build-push
         uses: docker/build-push-action@v3
         with:
+          push: true
           context: ${{ inputs.context }}
-          tags: |
-            ${{ env.name }}:${{ env.branch }}
-            ${{ env.name }}:${{ env.branch }}-${{ env.commit }}
-            ${{ env.name }}:${{ env.number }}
-          load: true
           secrets: ${{ secrets.build_secrets }}
-
-      - name: docker-tag
-        env:
-          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:github-${number}
-          docker images
-
-      - name: docker-push
-        env:
-          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker push ${ecr_registry}/${name}:${branch}
-          docker push ${ecr_registry}/${name}:${branch}-${commit}
-          docker push ${ecr_registry}/${name}:github-${number}
+          tags: |
+            ${ecr_registry}/${name}:${branch}
+            ${ecr_registry}/${name}:${branch}-${commit}
+            ${ecr_registry}/${name}:github-${number}
