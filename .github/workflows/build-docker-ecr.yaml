@@ -22,7 +22,7 @@ on:
         required: false
 
 jobs:
-  build:
+  main:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -63,11 +63,16 @@ jobs:
           load: true
           secrets: ${{ secrets.build_secrets }}
 
-      - name: debug
+      - name: docker-tag
         env:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
-          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
-          echo docker tag ${name}:${number} ${ecr_registry}/${name}:${number}
+          docker tag ${{ inputs.name }}:${number} ${ecr_registry}/${name}:${branch}
+          docker tag ${{ inputs.name }}:${number} ${ecr_registry}/${name}:${branch}-${commit}
+          docker tag ${{ inputs.name }}:${number} ${ecr_registry}/${name}:github-${number}
+
+      - name: docker-push
+        env:
+          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+        run: |
           docker images
