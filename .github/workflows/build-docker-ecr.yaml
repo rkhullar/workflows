@@ -1,0 +1,69 @@
+name: build-docker-ecr
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      region:
+        required: true
+    secrets:
+      ecr_access_key:
+        required: true
+      ecr_secret_key:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: config-environment
+        env:
+          branch: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          number: ${{ github.run_number }}
+        run: |
+          echo "branch=${branch//\//-}"           >> $GITHUB_ENV
+          echo "commit=${commit:0:7}"             >> $GITHUB_ENV
+          echo "number=${number}"                 >> $GITHUB_ENV
+
+      - name: setup-buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: config-aws
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ecr_access_key }}
+          aws-secret-access-key: ${{ secrets.ecr_secret_key }}
+          aws-region: ${{ inputs.region }}
+
+      - name: login-ecr
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: docker-build
+        uses: docker/build-push-action@v3
+        with:
+          context: docker/npm-test/v2
+          tags: |
+            ${{ inputs.name }}:${{ env.branch }}
+            ${{ inputs.name }}:${{ env.branch }}-${{ env.commit }}
+            ${{ inputs.name }}:${{ env.number }}
+          load: true
+          secrets: |
+            npm_auth=${{ secrets.NPM_CONFIG__AUTH }}
+            npm_email=${{ secrets.NPM_CONFIG_EMAIL }}
+            npm_registry=${{ secrets.NPM_CONFIG_REGISTRY }}
+
+      - name: debug
+        env:
+          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
+          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
+          docker tag ${name}:${number} ${ecr_registry}/${name}:${number}
+          docker images
