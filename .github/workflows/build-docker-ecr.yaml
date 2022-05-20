@@ -59,6 +59,11 @@ jobs:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
         run: |
           docker pull ${ecr_registry}/${name}:${branch}
+          docker tag ${ecr_registry}/${name}:${branch} ${name}:${branch}-cache
+          docker rmi ${ecr_registry}/${name}:${branch}
+
+      - name: debug
+        run: |
           docker images
 
       - name: docker-build
