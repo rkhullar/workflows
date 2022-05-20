@@ -76,7 +76,7 @@ jobs:
             ${{ env.name }}:${{ env.number }}
           load: true
           secrets: ${{ secrets.build_secrets }}
-          cache-from: ${ecr_registry}/${name}:${branch}
+          cache-from: ${{ env.name }}:${{ env.branch }}-cache
 
       - name: docker-tag
         env:
