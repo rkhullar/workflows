@@ -59,6 +59,7 @@ jobs:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
         run: |
           docker pull ${ecr_registry}/${name}:${branch}
+          docker images
 
       - name: docker-build
         uses: docker/build-push-action@v3
