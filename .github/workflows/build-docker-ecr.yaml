@@ -46,51 +46,38 @@ jobs:
       - name: config-aws
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.ecr_access_key }}
+          aws-access-key-id:     ${{ secrets.ecr_access_key }}
           aws-secret-access-key: ${{ secrets.ecr_secret_key }}
-          aws-region: ${{ inputs.region }}
+          aws-region:            ${{ inputs.region }}
 
       - name: login-ecr
-        id: login-ecr
+        id:   login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: docker-pull
+      - name: login-ghcr
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: config-environment
         env:
           ecr_registry: ${{ steps.login-ecr.outputs.registry }}
+          github_image: ghcr.io/${{ github.repository }}/${{ env.name }}
         run: |
-          docker pull ${ecr_registry}/${name}:${branch}
-          docker tag ${ecr_registry}/${name}:${branch} ${name}:${branch}-cache
-          docker rmi ${ecr_registry}/${name}:${branch}
+          echo "ecr_registry=${ecr_registry}" >> $GITHUB_ENV
+          echo "github_image=${github_image}" >> $GITHUB_ENV
 
-      - name: debug
-        run: |
-          docker images
-
-      - name: docker-build
+      - name: docker-build-publish
         uses: docker/build-push-action@v3
         with:
           context: ${{ inputs.context }}
+          push:    true
           tags: |
-            ${{ env.name }}:${{ env.branch }}
-            ${{ env.name }}:${{ env.branch }}-${{ env.commit }}
-            ${{ env.name }}:${{ env.number }}
-          load: true
-          secrets: ${{ secrets.build_secrets }}
-          cache-from: ${{ env.name }}:${{ env.branch }}-cache
-
-      - name: docker-tag
-        env:
-          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:${branch}-${commit}
-          docker tag ${name}:${number} ${ecr_registry}/${name}:github-${number}
-          docker images
-
-      - name: docker-push
-        env:
-          ecr_registry: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker push ${ecr_registry}/${name}:${branch}
-          docker push ${ecr_registry}/${name}:${branch}-${commit}
-          docker push ${ecr_registry}/${name}:github-${number}
+            ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}
+            ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}-${{ env.commit }}
+            ${{ env.ecr_registry }}/${{ env.name }}:${{ env.number }}
+          secrets:    ${{ secrets.build_secrets }}
+          cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
+          cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
