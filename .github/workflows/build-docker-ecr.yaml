@@ -35,10 +35,10 @@ jobs:
           number: ${{ github.run_number }}
           name  : ${{ inputs.name }}
         run: |
-          echo "branch=${branch//\//-}"           >> $GITHUB_ENV
-          echo "commit=${commit:0:7}"             >> $GITHUB_ENV
-          echo "number=${number}"                 >> $GITHUB_ENV
-          echo "name=${name}"                     >> $GITHUB_ENV
+          echo "branch=${branch//\//-}" >> $GITHUB_ENV
+          echo "commit=${commit:0:7}"   >> $GITHUB_ENV
+          echo "number=${number}"       >> $GITHUB_ENV
+          echo "name=${name}"           >> $GITHUB_ENV
 
       - name: setup-buildx
         uses: docker/setup-buildx-action@v2
