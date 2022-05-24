@@ -10,9 +10,6 @@ on:
         type: string
         required: false
         default: .
-      build_args:
-        type: string
-        required: false
       region:
         type: string
         required: true
@@ -21,6 +18,8 @@ on:
         required: true
       ecr_secret_key:
         required: true
+      build_args:
+        required: false
       build_secrets:
         required: false
 
@@ -81,6 +80,7 @@ jobs:
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}-${{ env.commit }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.number }}
+          build-args: ${{ secrets.build_args }}
           secrets:    ${{ secrets.build_secrets }}
           cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
           cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
