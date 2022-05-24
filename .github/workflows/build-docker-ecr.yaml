@@ -10,6 +10,9 @@ on:
         type: string
         required: false
         default: .
+      build_args:
+        type: string
+        required: false
       region:
         type: string
         required: true
