@@ -18,6 +18,8 @@ on:
         required: true
       ecr_secret_key:
         required: true
+      build_args:
+        required: false
       build_secrets:
         required: false
 
@@ -30,7 +32,7 @@ jobs:
 
       - name: config-environment
         env:
-          branch: ${{ github.ref_name }}
+          branch: ${{ github.head_ref || github.ref_name }}
           commit: ${{ github.sha }}
           number: ${{ github.run_number }}
           name  : ${{ inputs.name }}
@@ -77,7 +79,8 @@ jobs:
           tags: |
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}-${{ env.commit }}
-            ${{ env.ecr_registry }}/${{ env.name }}:${{ env.number }}
+            ${{ env.ecr_registry }}/${{ env.name }}:github-${{ env.number }}
+          build-args: ${{ secrets.build_args }}
           secrets:    ${{ secrets.build_secrets }}
           cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
           cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
