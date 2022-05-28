@@ -16,11 +16,10 @@ on:
       cache_name:
         type: string
         required: false
-        default: caches/${0}/${1}
+        default: caches/{0}/{1}
       cache_suffix:
         type: string
         required: false
-        default: ''
     secrets:
       ecr_access_key:
         required: true
@@ -76,6 +75,7 @@ jobs:
         run: |
           echo "ecr_registry=${ecr_registry}" >> $GITHUB_ENV
           echo "github_image=${github_image}" >> $GITHUB_ENV
+          echo "github_tag=${{ join([env.branch, inputs.cache_suffix], '-') }}"
           echo ${github_image}
 
       - name: docker-build-publish
@@ -88,5 +88,5 @@ jobs:
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.branch }}-${{ env.commit }}
             ${{ env.ecr_registry }}/${{ env.name }}:${{ env.number }}
           secrets:    ${{ secrets.build_secrets }}
-          cache-from: type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache
-          cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.branch }}-cache,mode=max
+          cache-from: type=registry,ref=${{ env.github_image }}:${{ env.github_tag }}
+          cache-to:   type=registry,ref=${{ env.github_image }}:${{ env.github_tag }},mode=max
