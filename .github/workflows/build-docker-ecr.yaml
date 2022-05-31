@@ -86,7 +86,7 @@ jobs:
           template, cache_suffix = '${{ inputs.cache_name }}', '${{ inputs.cache_suffix }}'
           owner, repo, name, branch = map(os.environ.get, ['owner', 'repo', 'name', 'branch'])
           github_image = f'ghcr.io/{template}'.format(owner=owner, repo=repo, name=name)
-          github_tag = '-'.join(None, [branch, cache_suffix])
+          github_tag = '-'.join(filter(None, [branch, cache_suffix]))
           print(f'::set-output name=github_image::{github_image}')
           print(f'::set-output name=github_tag::{github_tag}')
 
