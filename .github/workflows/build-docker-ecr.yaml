@@ -82,8 +82,12 @@ jobs:
       - name : python-helper
         shell: python
         run  : |
-          print('hello')
-          print('world')
+          import os
+          template     = '${{ inputs.cache_name }}'
+          cache_suffix = '${{ inputs.cache_suffix }}'
+          owner, repo, name, branch = map(os.environ.get, ['owner', 'repo', 'name', 'branch'])
+          print(template, cache_suffix)
+          print(owner, repo, name, branch)
 
       - name: config-environment
         env:
