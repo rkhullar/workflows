@@ -16,7 +16,7 @@ on:
       cache_name:
         type: string
         required: false
-        default: {0}/caches/{1}/{2}
+        default: '{0}/caches/{1}/{2}'
       cache_suffix:
         type: string
         required: false
