@@ -81,6 +81,7 @@ jobs:
           echo "github_tag=${github_tag}"     >> $GITHUB_ENV
           echo ${github_image}
           echo ${github_tag}
+          echo ${{ toJson(github.event) }}
 
       - name: docker-build-publish
         uses: docker/build-push-action@v3
