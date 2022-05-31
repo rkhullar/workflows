@@ -16,7 +16,7 @@ on:
       cache_name:
         type: string
         required: false
-        default: '{0}/caches/{1}/{2}'
+        default: '{owner}/caches/{repo}/{name}'
       cache_suffix:
         type: string
         required: false
@@ -79,15 +79,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name : python-helper
+      - id   : python-helper
         shell: python
         run  : |
           import os
-          template     = '${{ inputs.cache_name }}'
-          cache_suffix = '${{ inputs.cache_suffix }}'
+          template, cache_suffix = '${{ inputs.cache_name }}', '${{ inputs.cache_suffix }}'
           owner, repo, name, branch = map(os.environ.get, ['owner', 'repo', 'name', 'branch'])
-          print(template, cache_suffix)
-          print(owner, repo, name, branch)
+          github_image = f'ghcr.io/{template}'.format(owner=owner, repo=repo, name=name)
+          github_tag = '-'.join(None, [branch, cache_suffix])
+          print(f'::set-output name=github_image::{github_image}')
+          print(f'::set-output name=github_tag::{github_tag}')
 
       - name: config-environment
         env:
@@ -95,6 +96,8 @@ jobs:
           github_image: ghcr.io/${{ format(inputs.cache_name, env.owner, env.repo, env.name) }}
           github_tag  : ${{ env.branch }}-${{ inputs.cache_suffix }}
         run: |
+          echo ${{ steps.python-helper.outputs.github_image }}
+          echo ${{ steps.python-helper.outputs.github_tag }}
           echo "ecr_registry=${ecr_registry}" >> $GITHUB_ENV
           echo "github_image=${github_image}" >> $GITHUB_ENV
           echo "github_tag=${github_tag}"     >> $GITHUB_ENV
