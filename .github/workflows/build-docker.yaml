@@ -62,8 +62,8 @@ jobs:
         id:   login-docker
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.docker_username }}
-          password: ${{ secrets.docker_password }}
+          username: ${{ secrets.dockerhub_username }}
+          password: ${{ secrets.dockerhub_token }}
 
       - name: login-ghcr
         uses: docker/login-action@v2
