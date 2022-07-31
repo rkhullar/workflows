@@ -10,9 +10,6 @@ on:
         type: string
         required: false
         default: .
-      region:
-        type: string
-        required: true
       cache_name:
         type: string
         required: false
@@ -27,6 +24,8 @@ on:
         required: false
       ecr_secret_key:
         required: false
+      region:
+        required: true
       build_args:
         required: false
       build_secrets:
